@@ -26,14 +26,14 @@ class ResPartnerBank(models.Model):
         return super().write(vals)
 
     def _add_bank_vals(self, vals):
-        if vals.get("acc_number") and not vals.get("bank_id"):
-            vals["bank_id"] = self._get_bank_from_iban(vals["acc_number"]).id
+        if vals.get("account_number") and not vals.get("bank_id"):
+            vals["bank_id"] = self._get_bank_from_iban(vals["account_number"]).id
         return vals
 
     @api.model
-    def _get_bank_from_iban(self, acc_number):
+    def _get_bank_from_iban(self, account_number):
         try:
-            iban = schwifty.IBAN(acc_number)
+            iban = schwifty.IBAN(account_number)
             country_code = iban.country_code
             country = self.env["res.country"].search([("code", "=", country_code)])
             if iban.bank:
@@ -63,18 +63,18 @@ class ResPartnerBank(models.Model):
             bank = self.env["res.bank"]
         return bank
 
-    @api.onchange("acc_number", "acc_type")
+    @api.onchange("account_number", "account_type")
     def _onchange_acc_number_base_bank_from_iban(self):
-        if self.acc_type != "iban":
+        if self.account_type != "iban":
             return
-        acc_number = pretty_iban(normalize_iban(self.acc_number)).upper()
-        country_code = self.acc_number[:2].lower()
+        account_number = pretty_iban(normalize_iban(self.account_number)).upper()
+        country_code = self.account_number[:2].lower()
         iban_template = _map_iban_template[country_code]
         first_match = iban_template[2:].find("B") + 2
         last_match = iban_template.rfind("B") + 1
-        bank_code = acc_number[first_match:last_match].replace(" ", "")
+        bank_code = account_number[first_match:last_match].replace(" ", "")
         bank = self.env["res.bank"].search(
             [("code", "=", bank_code), ("country.code", "=", country_code.upper())],
             limit=1,
         )
-        self.update({"bank_id": bank.id, "acc_number": acc_number})
+        self.update({"bank_id": bank.id, "account_number": account_number})

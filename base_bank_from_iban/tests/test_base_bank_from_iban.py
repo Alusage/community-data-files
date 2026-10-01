@@ -26,34 +26,34 @@ class TestBaseBankFromIban(common.TransactionCase):
 
     def test_onchange_acc_number_iban(self):
         partner_bank = Form(self.bank_obj)
-        partner_bank.acc_number = "es1299999999509999999999"
-        self.assertEqual(partner_bank.acc_number, "ES12 9999 9999 5099 9999 9999")
+        partner_bank.account_number = "es1299999999509999999999"
+        self.assertEqual(partner_bank.account_number, "ES12 9999 9999 5099 9999 9999")
         self.assertEqual(partner_bank.bank_id, self.bank)
 
     def test_onchange_acc_number_no_iban(self):
         partner_bank = Form(self.bank_obj)
-        partner_bank.acc_number = "es1299999999509999999999x"
+        partner_bank.account_number = "es1299999999509999999999x"
         self.assertFalse(partner_bank.bank_id)
 
     def test_onchange_acc_number_iban_wizard(self):
         wizard = Form(self.env["account.setup.bank.manual.config"])
-        wizard.acc_number = "99999999509999999999"
+        wizard.account_number = "99999999509999999999"
         self.assertFalse(wizard.bank_id)
-        wizard.acc_number = "ES1299999999509999999999"
-        self.assertEqual(wizard.acc_number, "ES12 9999 9999 5099 9999 9999")
+        wizard.account_number = "ES1299999999509999999999"
+        self.assertEqual(wizard.account_number, "ES12 9999 9999 5099 9999 9999")
         self.assertEqual(wizard.bank_id, self.bank)
-        wizard.acc_number = ""
+        wizard.account_number = ""
         self.assertEqual(wizard.bank_id, self.bank)
 
     def test_create_iban_not_found(self):
         partner_bank = self.env["res.partner.bank"].create(
-            {"acc_number": "es1299999999509999999999", "partner_id": self.partner.id}
+            {"account_number": "es1299999999509999999999", "partner_id": self.partner.id}
         )
         self.assertFalse(partner_bank.bank_id)
 
     def test_create_iban_found(self):
         partner_bank = self.env["res.partner.bank"].create(
-            {"acc_number": "DE89370400440532013000", "partner_id": self.partner.id}
+            {"account_number": "DE89370400440532013000", "partner_id": self.partner.id}
         )
         self.assertTrue(partner_bank.bank_id)
         self.assertTrue(partner_bank.bank_id.name, "Commerzbank")
@@ -70,14 +70,14 @@ class TestBaseBankFromIban(common.TransactionCase):
             }
         )
         partner_bank = self.env["res.partner.bank"].create(
-            {"acc_number": "DE89370400440532013000", "partner_id": self.partner.id}
+            {"account_number": "DE89370400440532013000", "partner_id": self.partner.id}
         )
         self.assertEqual(partner_bank.bank_id, bank)
         self.assertTrue(bank.bic, "COBADEFFXXX")
 
     def test_create_invalid_iban(self):
         partner_bank = self.env["res.partner.bank"].create(
-            {"acc_number": "1234567890", "partner_id": self.partner.id}
+            {"account_number": "1234567890", "partner_id": self.partner.id}
         )
         # The important thing here is to not see any warning in the log
         self.assertTrue(partner_bank)

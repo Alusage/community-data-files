@@ -7,15 +7,15 @@ from odoo import api, models
 class AccountSetupBankManualConfig(models.TransientModel):
     _inherit = "account.setup.bank.manual.config"
 
-    @api.onchange("acc_number")
+    @api.onchange("account_number")
     def _onchange_acc_number_base_bank_from_iban(self):
-        if not self.acc_number:
+        if not self.account_number:
             return
-        partner_bank = self.env["res.partner.bank"].new({"acc_number": self.acc_number})
+        partner_bank = self.env["res.partner.bank"].new({"account_number": self.account_number})
         partner_bank._onchange_acc_number_base_bank_from_iban()
         self.update(
             {
-                "acc_number": partner_bank.acc_number,
+                "account_number": partner_bank.account_number,
                 "bank_id": partner_bank.bank_id.id,
             }
         )
